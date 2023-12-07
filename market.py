@@ -1,19 +1,19 @@
 # Importando a instância Flask da biblioteca flask
-from flask import Flask
+from flask import Flask, render_template
 
 # Criando uma instância do Flask
 app = Flask(__name__)
 
 # Usando o decorator para que quando alguém entrar no root da página (home) execute a seguinte função 
 @app.route("/")
+# Usando outra route para acessar a mesma página. Você consegue acessar "home.html" pelos dois caminhos
+@app.route("/home")
 # Função que retorna a página html
-def hello_world():
-  return "hello"
+def home_page():
+  return render_template('home.html')
 
-# Criando outro decorator para renderizar a página about
-@app.route('/about')
-def about_page():
-     return 'a'
+
+
 
 
 
