@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Register Page
+{% endblock %}
+
+
+{% block content %}
+<div class="container mt-3">
+    <h1 class="h3 mb-3 font-weight-normal text-center">
+        Please Create your Account
+    </h1>
+    <br>
+    <!-- Usamos o método post pois ele impacta no nosso BD -->
+    <form class="form-register" style="color:white" method="POST">
+        {{ form.hidden_tag() }}
+        <!-- texto que ficará no username -->
+        {{ form.username.label(class="mb-2")}}
+        <!-- Esse statement irá aceitar o input do user, o argumento é só uma classe do boostrap -->
+        {{form.username(class="form-control mb-3", placeholder="User Name") }}
+
+        {{ form.email_address.label(class="mb-2")}}
+        {{form.email_address(class="form-control mb-3", placeholder="Email address") }}
+
+        {{ form.password1.label(class="mb-2")}}
+        {{form.password1(class="form-control mb-3", placeholder="Password") }}
+
+        {{ form.password2.label(class="mb-2")}}
+        {{form.password2(class="form-control mb-3", placeholder="Confirm Passowrd") }}
+
+        <br>
+        {{ form.submit(class="btn btn-lg btn-block btn-primary") }}
+    </form>
+</div>
+
+{% endblock %}
+
+
+
+
