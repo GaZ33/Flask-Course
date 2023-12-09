@@ -1,9 +1,9 @@
 # importando o decorator app do package
 from market import app, db
-# Importando o render_template
-from flask import render_template, redirect, url_for
+# Importando o render_template e algumas outras funções
+from flask import render_template, redirect, url_for, flash, get_flashed_messages
 # Importando nossos modulos
-from market import Item, User
+from market.models import Item, User
 # Importando nosso forms
 from market.forms import RegisterForm
 
@@ -41,7 +41,8 @@ def register_page():
     return redirect(url_for("market_page"))
   # Verificando se há um erro na validação, os erros vem em forma de dicionário
   if form.errors != {}:
+    # Para cada error que o usuário fizer mostrará para ele com a função flash
     for err_msg in form.errors.values():
-      ...
+      flash(F"There was an error with creating a user: {err_msg}", category="danger")
   return render_template("register.html", form = form)
 
