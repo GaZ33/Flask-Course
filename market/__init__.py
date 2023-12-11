@@ -26,7 +26,11 @@ bcrypt = Bcrypt(app)
 # Criando a instância da classe que irá cuidar do login para reconhecer a aplicação
 LoginManager = LoginManager(app)
 
+# Fazendo com que reconheça onde é a nossa página de login para redirecionar o user
+LoginManager.login_view = "login_page"
 
+# Alterando a flash message que aparece quando vc é redirecionado para login page
+LoginManager.login_message_category = "info"
 
 # Importando nossas rotas para a inicialização
 from market import routes

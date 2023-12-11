@@ -9,7 +9,7 @@ from market.forms import RegisterForm, LoginForm
 # Importando a instancia para os campos do login
 from market import LoginManager
 # Importando função para realizar o login
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required
 
 # Usando o decorator para que quando alguém entrar no root da página (home) execute a seguinte função 
 @app.route("/")
@@ -21,6 +21,9 @@ def home_page():
 
 # Usando o decorator para quando alguém acessar o market exibir a página
 @app.route("/market")
+# Usando o decorator para verificar se o usuário está logado antes de ir para a págida, e podemos pedir para que
+# ele se registre
+@login_required
 # Função que retorna o market.html
 def market_page():
   # Fazendo a query para todos os items aparecerem no market
@@ -42,6 +45,11 @@ def register_page():
     db.session.add(user_to_create)
     # Salvando os dados no DB
     db.session.commit()
+    # Quando o usuário efutuar o register já sera logado com esse usuário que ele criou
+    login_user(user_to_create)
+      
+    flash(f'Account created successfully! You are now logged in as: {user_to_create.username}', category='success')
+    # Retornando para o market
     return redirect(url_for("market_page"))
   # Verificando se há um erro na validação, os erros vem em forma de dicionário
   if form.errors != {}:
@@ -64,15 +72,22 @@ def login_page():
               attempted_password=form.password.data
     ):
       login_user(attempted_user)
+      
       flash(f'Sucess! You are logged in as: {attempted_user.username}', category='success')
-      redirect(url_for('market_page'))
+      return redirect(url_for('market_page'))
     else:
       flash('Username and password are not match! Please try again', category='danger')
   return render_template('login.html', form=form)
 
 
-
-
+# Criando a route para deslogar
+@app.route('/logout')
+def logout_page():
+  # Função para deslogar
+  logout_user()
+  # Função para exibir que foi deslogado
+  flash(F"You have been logged out", category="info")
+  return redirect(url_for('home_page'))
 
 
 
