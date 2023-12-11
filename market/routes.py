@@ -5,7 +5,11 @@ from flask import render_template, redirect, url_for, flash, get_flashed_message
 # Importando nossos modulos
 from market.models import Item, User
 # Importando nosso forms
-from market.forms import RegisterForm
+from market.forms import RegisterForm, LoginForm
+# Importando a instancia para os campos do login
+from market import LoginManager
+# Importando função para realizar o login
+from flask_login import login_user
 
 # Usando o decorator para que quando alguém entrar no root da página (home) execute a seguinte função 
 @app.route("/")
@@ -33,7 +37,7 @@ def register_page():
     # Criando uma instância com os dados que o user colocou
     user_to_create = User(username=form.username.data,
                           email_address=form.email_address.data,
-                          password_hash=form.password1.data)
+                          password=form.password1.data)
     # Colocando para adicionar os dados 
     db.session.add(user_to_create)
     # Salvando os dados no DB
@@ -45,4 +49,32 @@ def register_page():
     for err_msg in form.errors.values():
       flash(F"There was an error with creating a user: {err_msg}", category="danger")
   return render_template("register.html", form = form)
+
+# Criando mais um route para o login
+@app.route('/login', methods=['GET', 'POST'])
+def login_page():
+  # Criando o form para o user colocar os inputs
+  form = LoginForm()
+  # Condição que verifica se há ou não esse nome no BD
+  if form.validate_on_submit():
+    # Procura o user no BD
+    attempted_user = User.query.filter_by(username=form.username.data).first()
+    # Se encontrar o usur no BD:
+    if attempted_user and attempted_user.check_password_correction(
+              attempted_password=form.password.data
+    ):
+      login_user(attempted_user)
+      flash(f'Sucess! You are logged in as: {attempted_user.username}', category='success')
+      redirect(url_for('market_page'))
+    else:
+      flash('Username and password are not match! Please try again', category='danger')
+  return render_template('login.html', form=form)
+
+
+
+
+
+
+
+
 

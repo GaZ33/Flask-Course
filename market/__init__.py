@@ -1,8 +1,11 @@
 # Importando a instância Flask da biblioteca flask
-from flask import Flask, render_template
+from flask import Flask
 # Importando a classe SQLAlchemy da ferramenta flask_sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
-
+# Importando a classe para criptografar as senhas
+from flask_bcrypt import Bcrypt
+# Importando a classe para cuidar do nosso login
+from flask_login import LoginManager
 
 
 
@@ -17,8 +20,11 @@ app.config['SECRET_KEY'] = "edc3f2f78cd420d856afa59f"
 # Criando uma instância da SQLAlchemy, precisamos passar nossa aplicação como argumento "app"
 db = SQLAlchemy(app=app)
 
-from market.models import Item
+# Criando a instância da criptografia para reconhecer a aplicação
+bcrypt = Bcrypt(app)
 
+# Criando a instância da classe que irá cuidar do login para reconhecer a aplicação
+LoginManager = LoginManager(app)
 
 
 
