@@ -1,15 +1,15 @@
 # importando o decorator app do package
 from market import app, db
 # Importando o render_template e algumas outras funções
-from flask import render_template, redirect, url_for, flash, get_flashed_messages
+from flask import render_template, redirect, url_for, flash, request
 # Importando nossos modulos
 from market.models import Item, User
 # Importando nosso forms
-from market.forms import RegisterForm, LoginForm
+from market.forms import RegisterForm, LoginForm, PurchaseItemForm, SellItemForm
 # Importando a instancia para os campos do login
 from market import LoginManager
 # Importando função para realizar o login
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
 # Usando o decorator para que quando alguém entrar no root da página (home) execute a seguinte função 
 @app.route("/")
@@ -20,15 +20,39 @@ def home_page():
   return render_template('home.html')
 
 # Usando o decorator para quando alguém acessar o market exibir a página
-@app.route("/market")
+@app.route("/market", methods=['GET', 'POST'])
 # Usando o decorator para verificar se o usuário está logado antes de ir para a págida, e podemos pedir para que
 # ele se registre
 @login_required
 # Função que retorna o market.html
 def market_page():
-  # Fazendo a query para todos os items aparecerem no market
-  items = Item.query.all()
-  return render_template('market.html', items = items)
+  # Criando a instância do forms para comprar e vender
+  purchase_form = PurchaseItemForm()
+  # Quando o user clicar em comprar
+  if request.method == "POST":
+    # Consegue o nome do Item, como o nome é unico não teremos problema com duplacidade
+    purchased_item =  request.form.get("purchased_item")
+    # Procurando no DB se existe o item ou se alguém já comprou
+    p_item_object = Item.query.filter_by(name=purchased_item).first()
+    # Se existir ele não vai retornar como None e entrará nesse if
+    if p_item_object:
+      # Verificando se o user tem o money para comprar o item
+      if current_user.can_purchase(p_item_object):
+        p_item_object.buy(current_user)
+        flash(f"Congratulations! You purchased {p_item_object.name} for {p_item_object.price}$", category="success")
+      # Se ele não tiver money suficiente
+      else:
+        flash(f"Unfortunately! You do not have enough money to purchase {p_item_object.name}", category='danger')
+
+    return redirect(url_for('market_page'))
+
+  if request.method == "GET":
+    # Fazendo a query para que os items que não tem owner aparecerem no market
+    items = Item.query.filter_by(owner=None)
+    return render_template('market.html', items = items, purchase_form = purchase_form)
+  
+
+  
 
 # Criando outro route para se registrar
 @app.route("/register", methods=['GET', 'POST'])

@@ -23,6 +23,17 @@ class Item(db.Model, UserMixin):
     #função para nomear os items quando fizer a query pelo python shell
     def __repr__(self):
         return f'item {self.name}'
+    
+    def buy(self, user):
+        # Atribuindo a nossa foreign key para o id do usuário
+        self.owner = user.id
+        # Subtraindo o money
+        user.budget -= self.price
+        # Realizando as alterações
+        db.session.commit()
+
+
+
 
 # Usando o decorator que será responsável pela sessão cada vez que alterar a página
 @LoginManager.user_loader
@@ -43,7 +54,7 @@ class User(db.Model, UserMixin):
     @property
     def prettier_budget(self):
         if len(str(self.budget)) >= 4:
-            return f"{str(self.budget)[:-3]}, {str(self.budget)[-3:]}$"
+            return f"{str(self.budget)[:-3]},{str(self.budget)[-3:]}$"
         else:
             return f"{self.budget}$"
 
@@ -60,6 +71,9 @@ class User(db.Model, UserMixin):
         # Essa função verifica para nós e retorna true or false
         return bcrypt.check_password_hash(self.password_hash, attempted_password)
     
+    def can_purchase(self, item_objt):
+        return self.budget >= item_objt.price
+        
     
 
 # Necessário para a criação do BD com essa tabela item
