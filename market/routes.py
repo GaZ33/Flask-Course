@@ -28,6 +28,7 @@ def home_page():
 def market_page():
   # Criando a instância do forms para comprar e vender
   purchase_form = PurchaseItemForm()
+  selling_form = SellItemForm()
   # Quando o user clicar em comprar
   if request.method == "POST":
     # Consegue o nome do Item, como o nome é unico não teremos problema com duplacidade
@@ -43,13 +44,24 @@ def market_page():
       # Se ele não tiver money suficiente
       else:
         flash(f"Unfortunately! You do not have enough money to purchase {p_item_object.name}", category='danger')
-
+    
+    sold_item = request.form.get("sold_item")
+    s_item_object = Item.query.filter_by(name=sold_item).first()
+    if s_item_object:
+      if current_user.can_sell(s_item_object):
+        s_item_object.sell(current_user)
+        flash(f'Congratulations! You sold {s_item_object.name} back to the market', category="success")
+      
+      else:
+        flash(f'Something went wrong with selling {s_item_object.name}', category="danger")
     return redirect(url_for('market_page'))
 
   if request.method == "GET":
     # Fazendo a query para que os items que não tem owner aparecerem no market
     items = Item.query.filter_by(owner=None)
-    return render_template('market.html', items = items, purchase_form = purchase_form)
+    # Criando a query para exibir os items do atual usuários
+    owned_items = Item.query.filter_by(owner=current_user.id)
+    return render_template('market.html', items=items, purchase_form=purchase_form, owned_items=owned_items, selling_form=selling_form)
   
 
   

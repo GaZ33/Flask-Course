@@ -32,7 +32,13 @@ class Item(db.Model, UserMixin):
         # Realizando as alterações
         db.session.commit()
 
-
+    def sell(self, user):
+        # Atribuindo a nossa foreign key para NOne
+        self.owner = None
+        # Adicionando o money
+        user.budget += self.price
+        # Realizando as alterações
+        db.session.commit()
 
 
 # Usando o decorator que será responsável pela sessão cada vez que alterar a página
@@ -74,7 +80,8 @@ class User(db.Model, UserMixin):
     def can_purchase(self, item_objt):
         return self.budget >= item_objt.price
         
-    
+    def can_sell(self, item_objet):
+        return item_objet in self.item
 
 # Necessário para a criação do BD com essa tabela item
 app.app_context().push()
